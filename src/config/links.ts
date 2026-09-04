@@ -1,3 +1,7 @@
+export const buttonWidth = 300;
+export const buttonHeight = 54;
+export const buttonGap = 15;
+
 export const links = [
   {
     name: "Facebook",

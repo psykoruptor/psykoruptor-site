@@ -1,18 +1,30 @@
 ---
 import SocialIcon from "../components/SocialIcon.astro";
-import { links } from "../config/links";
+import {
+  links,
+  buttonWidth,
+  buttonHeight,
+  buttonGap,
+} from "../config/links";
 
 const enabledLinks = links.filter((link) => link.enabled);
 
-const buttonHeight = 54;
-const buttonGap = 15;
-
+/*
+  Hauteur totale réellement occupée par les boutons.
+*/
 const surfaceHeight =
   enabledLinks.length * buttonHeight +
   Math.max(enabledLinks.length - 1, 0) * buttonGap;
 
-// Hauteur originale de bg1 / du masque complet
-const originalSurfaceHeight = 468;
+/*
+  bg1.png est basé sur la version originale :
+  300 × 468 px.
+
+  On garde cette surface fixe pour que l'image ne se
+  recadre pas différemment quand le nombre de liens change.
+*/
+const backgroundWidth = 300;
+const backgroundHeight = 468;
 ---
 
 <html lang="fr">
@@ -28,27 +40,36 @@ const originalSurfaceHeight = 468;
 
       <div
         class="links"
-        style={`--surface-height: ${surfaceHeight}px;`}
+        style={`
+          --button-width: ${buttonWidth}px;
+          --button-height: ${buttonHeight}px;
+          --button-gap: ${buttonGap}px;
+          --surface-height: ${surfaceHeight}px;
+        `}
       >
 
         <!--
-          Le SVG garde toujours la taille originale de bg1.png.
-          On ne redimensionne donc jamais l'image quand un lien
-          est activé/désactivé.
+          BG1 partagé par tous les boutons.
+
+          Le SVG conserve toujours les dimensions originales
+          de l'image. Il est simplement coupé en bas lorsque
+          moins de boutons sont affichés.
+
+          Ainsi, retirer un lien ne change pas le cadrage de bg1.
         -->
         <div class="button-surface">
           <svg
-            viewBox={`0 0 300 ${originalSurfaceHeight}`}
-            width="300"
-            height={originalSurfaceHeight}
+            viewBox={`0 0 ${backgroundWidth} ${backgroundHeight}`}
+            width={backgroundWidth}
+            height={backgroundHeight}
             preserveAspectRatio="none"
             aria-hidden="true"
           >
             <defs>
               <mask id="buttonMask" maskUnits="userSpaceOnUse">
                 <rect
-                  width="300"
-                  height={originalSurfaceHeight}
+                  width={backgroundWidth}
+                  height={backgroundHeight}
                   fill="black"
                 />
 
@@ -56,7 +77,7 @@ const originalSurfaceHeight = 468;
                   <rect
                     x="0"
                     y={index * (buttonHeight + buttonGap)}
-                    width="300"
+                    width={buttonWidth}
                     height={buttonHeight}
                     rx="10"
                     fill="white"
@@ -69,9 +90,9 @@ const originalSurfaceHeight = 468;
               href="/bg1.png"
               x="0"
               y="0"
-              width="300"
-              height={originalSurfaceHeight}
-              preserveAspectRatio="none"
+              width={backgroundWidth}
+              height={backgroundHeight}
+              preserveAspectRatio="xMidYMid slice"
               mask="url(#buttonMask)"
             />
           </svg>
@@ -120,40 +141,39 @@ const originalSurfaceHeight = 468;
 
   .links {
     position: relative;
-    width: 300px;
+
+    width: var(--button-width);
 
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: var(--button-gap);
   }
 
   /*
-    Le SVG garde toujours 300x468.
+    Le SVG garde toujours la taille originale de bg1.
 
-    On coupe simplement ce qui dépasse la hauteur réelle
-    des boutons actifs.
-
-    Ainsi bg1.png conserve exactement les mêmes coordonnées
-    quelle que soit la quantité de liens affichés.
+    Le conteneur, lui, est seulement aussi haut que les
+    boutons actuellement activés.
   */
   .button-surface {
     position: absolute;
     top: 0;
     left: 0;
 
-    width: 300px;
+    width: var(--button-width);
     height: var(--surface-height);
 
     overflow: hidden;
 
     pointer-events: none;
+
     filter: drop-shadow(0px 4px 7px rgba(0, 0, 0, 0.7));
   }
 
   .button-surface svg {
     display: block;
 
-    width: 300px;
+    width: var(--button-width);
     height: 468px;
   }
 
@@ -165,8 +185,8 @@ const originalSurfaceHeight = 468;
     grid-template-columns: 24px 1fr 24px;
     align-items: center;
 
-    width: 300px;
-    height: 54px;
+    width: var(--button-width);
+    height: var(--button-height);
     padding: 0 15px;
     box-sizing: border-box;
 
