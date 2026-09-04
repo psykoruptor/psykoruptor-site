@@ -1,5 +1,15 @@
 ---
 import SocialIcon from "../components/SocialIcon.astro";
+import { links } from "../config/links";
+
+const enabledLinks = links.filter((link) => link.enabled);
+
+const buttonHeight = 54;
+const buttonGap = 15;
+
+const surfaceHeight =
+  enabledLinks.length * buttonHeight +
+  Math.max(enabledLinks.length - 1, 0) * buttonGap;
 ---
 
 <html lang="fr">
@@ -18,67 +28,47 @@ import SocialIcon from "../components/SocialIcon.astro";
         <!-- BG1 partagé par tous les boutons -->
         <svg
           class="button-surface"
-          viewBox="0 0 300 468"
+          viewBox={`0 0 300 ${surfaceHeight}`}
           preserveAspectRatio="none"
           aria-hidden="true"
         >
           <defs>
             <mask id="buttonMask" maskUnits="userSpaceOnUse">
-              <rect width="300" height="468" fill="black" />
+              <rect
+                width="300"
+                height={surfaceHeight}
+                fill="black"
+              />
 
-              <rect x="0" y="0" width="300" height="54" rx="10" fill="white" />
-              <rect x="0" y="69" width="300" height="54" rx="10" fill="white" />
-              <rect x="0" y="138" width="300" height="54" rx="10" fill="white" />
-              <rect x="0" y="207" width="300" height="54" rx="10" fill="white" />
-              <rect x="0" y="276" width="300" height="54" rx="10" fill="white" />
-              <rect x="0" y="345" width="300" height="54" rx="10" fill="white" />
-              <rect x="0" y="414" width="300" height="54" rx="10" fill="white" />
+              {enabledLinks.map((_, index) => (
+                <rect
+                  x="0"
+                  y={index * (buttonHeight + buttonGap)}
+                  width="300"
+                  height={buttonHeight}
+                  rx="10"
+                  fill="white"
+                />
+              ))}
             </mask>
           </defs>
 
           <image
             href="/bg1.png"
             width="300"
-            height="468"
+            height={surfaceHeight}
             preserveAspectRatio="xMidYMid slice"
             mask="url(#buttonMask)"
           />
         </svg>
 
-        <a href="https://www.facebook.com/profile.php?id=61581756783961">
-          <SocialIcon name="Facebook" />
-          <span>Facebook</span>
-        </a>
+        {enabledLinks.map((link) => (
+          <a href={link.url}>
+            <SocialIcon name={link.name} />
+            <span>{link.name}</span>
+          </a>
+        ))}
 
-        <a href="https://www.instagram.com/psykoruptor/">
-          <SocialIcon name="Instagram" />
-          <span>Instagram</span>
-        </a>
-
-        <a href="https://www.tiktok.com/@psykoruptor_">
-          <SocialIcon name="TikTok" />
-          <span>TikTok</span>
-        </a>
-
-        <a href="https://www.youtube.com/@Psykoruptor">
-          <SocialIcon name="YouTube" />
-          <span>YouTube</span>
-        </a>
-
-        <a href="https://soundcloud.com/psykoruptor">
-          <SocialIcon name="SoundCloud" />
-          <span>SoundCloud</span>
-        </a>
-
-        <a href="https://shotgun.live/fr/artists/psykoruptor?utm_source=artist-1699305">
-          <SocialIcon name="Shotgun" />
-          <span>Shotgun</span>
-        </a>
-
-        <a href="https://github.com/psykoruptor">
-          <SocialIcon name="GitHub" />
-          <span>GitHub</span>
-        </a>
       </div>
     </main>
   </body>
@@ -106,11 +96,11 @@ import SocialIcon from "../components/SocialIcon.astro";
     height: auto;
     margin-bottom: 30px;
     filter:
-			drop-shadow(0px -0.5px 0.5px white)
-			drop-shadow(0px -2px 1.5px white)
-			drop-shadow(0px 1px 1px black)
-			drop-shadow(0px 2px 3px black)
-			drop-shadow(0px 3px 3px black);
+      drop-shadow(0px -0.5px 0.5px white)
+      drop-shadow(0px -2px 1.5px white)
+      drop-shadow(0px 1px 1px black)
+      drop-shadow(0px 2px 3px black)
+      drop-shadow(0px 3px 3px black);
   }
 
   .links {
@@ -124,16 +114,20 @@ import SocialIcon from "../components/SocialIcon.astro";
 
   /*
     Le SVG contient bg1.png et le masque.
-    Comme il est unique, bg1 reste parfaitement continu
-    d'un bouton à l'autre.
+
+    Sa hauteur et son masque sont générés automatiquement
+    en fonction du nombre de liens activés.
+
+    Ainsi, si on passe de 7 à 6 boutons, bg1 reste parfaitement
+    continu et les boutons restent exactement alignés.
   */
   .button-surface {
     position: absolute;
     inset: 0;
-	opacity: 1;
-	
+    opacity: 1;
+
     width: 300px;
-    height: 468px;
+    height: 100%;
 
     pointer-events: none;
 
@@ -164,8 +158,8 @@ import SocialIcon from "../components/SocialIcon.astro";
   .links a span {
     text-align: center;
 
-    filter: 
-			drop-shadow(0px -2px 2px white)
-			drop-shadow(0px 2px 2px black);
+    filter:
+      drop-shadow(0px -2px 2px white)
+      drop-shadow(0px 2px 2px black);
   }
 </style>

@@ -1,0 +1,37 @@
+export const links = [
+  {
+    name: "Facebook",
+    url: "https://www.facebook.com/profile.php?id=61581756783961",
+    enabled: true,
+  },
+  {
+    name: "Instagram",
+    url: "https://www.instagram.com/psykoruptor/",
+    enabled: true,
+  },
+  {
+    name: "TikTok",
+    url: "https://www.tiktok.com/@psykoruptor_",
+    enabled: true,
+  },
+  {
+    name: "YouTube",
+    url: "https://www.youtube.com/@Psykoruptor",
+    enabled: true,
+  },
+  {
+    name: "SoundCloud",
+    url: "https://soundcloud.com/psykoruptor",
+    enabled: true,
+  },
+  {
+    name: "Shotgun",
+    url: "https://shotgun.live/fr/artists/psykoruptor?utm_source=artist-1699305",
+    enabled: true,
+  },
+  {
+    name: "GitHub",
+    url: "https://github.com/psykoruptor",
+    enabled: false,
+  },
+];
