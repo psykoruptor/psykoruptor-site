@@ -10,6 +10,9 @@ const buttonGap = 15;
 const surfaceHeight =
   enabledLinks.length * buttonHeight +
   Math.max(enabledLinks.length - 1, 0) * buttonGap;
+
+// Hauteur originale de bg1 / du masque complet
+const originalSurfaceHeight = 468;
 ---
 
 <html lang="fr">
@@ -23,44 +26,56 @@ const surfaceHeight =
     <main>
       <img class="logo" src="/logotext1.png" alt="Psykoruptor" />
 
-      <div class="links">
+      <div
+        class="links"
+        style={`--surface-height: ${surfaceHeight}px;`}
+      >
 
-        <!-- BG1 partagé par tous les boutons -->
-        <svg
-          class="button-surface"
-          viewBox={`0 0 300 ${surfaceHeight}`}
-          preserveAspectRatio="none"
-          aria-hidden="true"
-        >
-          <defs>
-            <mask id="buttonMask" maskUnits="userSpaceOnUse">
-              <rect
-                width="300"
-                height={surfaceHeight}
-                fill="black"
-              />
-
-              {enabledLinks.map((_, index) => (
-                <rect
-                  x="0"
-                  y={index * (buttonHeight + buttonGap)}
-                  width="300"
-                  height={buttonHeight}
-                  rx="10"
-                  fill="white"
-                />
-              ))}
-            </mask>
-          </defs>
-
-          <image
-            href="/bg1.png"
+        <!--
+          Le SVG garde toujours la taille originale de bg1.png.
+          On ne redimensionne donc jamais l'image quand un lien
+          est activé/désactivé.
+        -->
+        <div class="button-surface">
+          <svg
+            viewBox={`0 0 300 ${originalSurfaceHeight}`}
             width="300"
-            height={surfaceHeight}
-            preserveAspectRatio="xMidYMid slice"
-            mask="url(#buttonMask)"
-          />
-        </svg>
+            height={originalSurfaceHeight}
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            <defs>
+              <mask id="buttonMask" maskUnits="userSpaceOnUse">
+                <rect
+                  width="300"
+                  height={originalSurfaceHeight}
+                  fill="black"
+                />
+
+                {enabledLinks.map((_, index) => (
+                  <rect
+                    x="0"
+                    y={index * (buttonHeight + buttonGap)}
+                    width="300"
+                    height={buttonHeight}
+                    rx="10"
+                    fill="white"
+                  />
+                ))}
+              </mask>
+            </defs>
+
+            <image
+              href="/bg1.png"
+              x="0"
+              y="0"
+              width="300"
+              height={originalSurfaceHeight}
+              preserveAspectRatio="none"
+              mask="url(#buttonMask)"
+            />
+          </svg>
+        </div>
 
         {enabledLinks.map((link) => (
           <a href={link.url}>
@@ -113,25 +128,33 @@ const surfaceHeight =
   }
 
   /*
-    Le SVG contient bg1.png et le masque.
+    Le SVG garde toujours 300x468.
 
-    Sa hauteur et son masque sont générés automatiquement
-    en fonction du nombre de liens activés.
+    On coupe simplement ce qui dépasse la hauteur réelle
+    des boutons actifs.
 
-    Ainsi, si on passe de 7 à 6 boutons, bg1 reste parfaitement
-    continu et les boutons restent exactement alignés.
+    Ainsi bg1.png conserve exactement les mêmes coordonnées
+    quelle que soit la quantité de liens affichés.
   */
   .button-surface {
     position: absolute;
-    inset: 0;
-    opacity: 1;
+    top: 0;
+    left: 0;
 
     width: 300px;
-    height: 100%;
+    height: var(--surface-height);
+
+    overflow: hidden;
 
     pointer-events: none;
-
     filter: drop-shadow(0px 4px 7px rgba(0, 0, 0, 0.7));
+  }
+
+  .button-surface svg {
+    display: block;
+
+    width: 300px;
+    height: 468px;
   }
 
   .links a {
