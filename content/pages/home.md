@@ -1,5 +1,5 @@
 ---
-title Psykoruptor
+title: Psykoruptor
 ---
 
 Bienvenue
