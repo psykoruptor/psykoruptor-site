@@ -1,0 +1,170 @@
+---
+import SocialIcon from "../components/SocialIcon.astro";
+---
+
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Psykoruptor — Links</title>
+  </head>
+
+  <body>
+    <main>
+      <img class="logo" src="/logotext1.png" alt="Psykoruptor" />
+
+      <div class="links">
+
+        <!-- BG1 partagé par tous les boutons -->
+        <svg
+          class="button-surface"
+          viewBox="0 0 300 468"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
+          <defs>
+            <mask id="buttonMask" maskUnits="userSpaceOnUse">
+              <rect width="300" height="468" fill="black" />
+
+              <rect x="0" y="0" width="300" height="54" rx="10" fill="white" />
+              <rect x="0" y="69" width="300" height="54" rx="10" fill="white" />
+              <rect x="0" y="138" width="300" height="54" rx="10" fill="white" />
+              <rect x="0" y="207" width="300" height="54" rx="10" fill="white" />
+              <rect x="0" y="276" width="300" height="54" rx="10" fill="white" />
+              <rect x="0" y="345" width="300" height="54" rx="10" fill="white" />
+              <rect x="0" y="414" width="300" height="54" rx="10" fill="white" />
+            </mask>
+          </defs>
+
+          <image
+            href="/bg1.png"
+            width="300"
+            height="468"
+            preserveAspectRatio="xMidYMid slice"
+            mask="url(#buttonMask)"
+          />
+        </svg>
+
+        <a href="https://www.facebook.com/profile.php?id=61581756783961">
+          <SocialIcon name="Facebook" />
+          <span>Facebook</span>
+        </a>
+
+        <a href="https://www.instagram.com/psykoruptor/">
+          <SocialIcon name="Instagram" />
+          <span>Instagram</span>
+        </a>
+
+        <a href="https://www.tiktok.com/@psykoruptor_">
+          <SocialIcon name="TikTok" />
+          <span>TikTok</span>
+        </a>
+
+        <a href="https://www.youtube.com/@Psykoruptor">
+          <SocialIcon name="YouTube" />
+          <span>YouTube</span>
+        </a>
+
+        <a href="https://soundcloud.com/psykoruptor">
+          <SocialIcon name="SoundCloud" />
+          <span>SoundCloud</span>
+        </a>
+
+        <a href="https://shotgun.live/fr/artists/psykoruptor?utm_source=artist-1699305">
+          <SocialIcon name="Shotgun" />
+          <span>Shotgun</span>
+        </a>
+
+        <a href="https://github.com/psykoruptor">
+          <SocialIcon name="GitHub" />
+          <span>GitHub</span>
+        </a>
+      </div>
+    </main>
+  </body>
+</html>
+
+<style>
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background-image: url("/bg0.png");
+    background-size: cover;
+    background-position: center;
+  }
+
+  main {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .logo {
+    width: 300px;
+    height: auto;
+    margin-bottom: 30px;
+    filter:
+			drop-shadow(0px -0.5px 0.5px white)
+			drop-shadow(0px -2px 1.5px white)
+			drop-shadow(0px 1px 1px black)
+			drop-shadow(0px 2px 3px black)
+			drop-shadow(0px 3px 3px black);
+  }
+
+  .links {
+    position: relative;
+    width: 300px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  /*
+    Le SVG contient bg1.png et le masque.
+    Comme il est unique, bg1 reste parfaitement continu
+    d'un bouton à l'autre.
+  */
+  .button-surface {
+    position: absolute;
+    inset: 0;
+
+    width: 300px;
+    height: 468px;
+
+    pointer-events: none;
+
+    filter: drop-shadow(0px 4px 7px rgba(0, 0, 0, 0.7));
+  }
+
+  .links a {
+    position: relative;
+    z-index: 1;
+
+    display: grid;
+    grid-template-columns: 24px 1fr 24px;
+    align-items: center;
+
+    width: 300px;
+    height: 54px;
+    padding: 0 15px;
+    box-sizing: border-box;
+
+    background: transparent;
+
+    color: white;
+    text-decoration: none;
+
+    border-radius: 10px;
+  }
+
+  .links a span {
+    text-align: center;
+
+    filter: 
+			drop-shadow(0px -2px 2px white)
+			drop-shadow(0px 2px 2px black);
+  }
+</style>

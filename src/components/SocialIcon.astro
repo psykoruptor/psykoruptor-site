@@ -1,0 +1,65 @@
+---
+import {
+  siFacebook,
+  siInstagram,
+  siTiktok,
+  siYoutube,
+  siSoundcloud,
+  siGithub,
+} from "simple-icons";
+
+interface Props {
+  name: string;
+}
+
+const { name } = Astro.props;
+
+const icons: Record<string, typeof siFacebook> = {
+  Facebook: siFacebook,
+  Instagram: siInstagram,
+  TikTok: siTiktok,
+  YouTube: siYoutube,
+  SoundCloud: siSoundcloud,
+  GitHub: siGithub,
+};
+
+const icon = icons[name];
+---
+
+{name === "Shotgun" ? (
+  <img
+    class="social-icon shotgun-icon"
+    src="/shotgunicon.png"
+    alt=""
+  />
+) : icon ? (
+  <svg
+    class="social-icon"
+    role="img"
+    viewBox="0 0 24 24"
+    aria-hidden="true"
+    style={`color: #${icon.hex};`}
+  >
+    <path d={icon.path} />
+  </svg>
+) : null}
+
+<style>
+  .social-icon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    display: block;
+
+    filter: drop-shadow(0px -2px 2px white)
+			drop-shadow(0px 2px 2px black);
+  }
+
+  .social-icon:not(.shotgun-icon) {
+    fill: currentColor;
+  }
+
+  .shotgun-icon {
+    object-fit: contain;
+  }
+</style>
