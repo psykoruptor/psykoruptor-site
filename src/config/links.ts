@@ -16,7 +16,7 @@ export const links = [
   {
     name: "TikTok",
     url: "https://www.tiktok.com/@psykoruptor_",
-    enabled: true,
+    enabled: false,
   },
   {
     name: "YouTube",
@@ -26,12 +26,12 @@ export const links = [
   {
     name: "SoundCloud",
     url: "https://soundcloud.com/psykoruptor",
-    enabled: true,
+    enabled: false,
   },
   {
     name: "Shotgun",
     url: "https://shotgun.live/fr/artists/psykoruptor?utm_source=artist-1699305",
-    enabled: true,
+    enabled: false,
   },
   {
     name: "GitHub",
