@@ -5,24 +5,15 @@ import {
   buttonWidth,
   buttonHeight,
   buttonGap,
+  iconMargin,
 } from "../config/links";
 
 const enabledLinks = links.filter((link) => link.enabled);
 
-/*
-  Hauteur totale réellement occupée par les boutons.
-*/
 const surfaceHeight =
   enabledLinks.length * buttonHeight +
   Math.max(enabledLinks.length - 1, 0) * buttonGap;
 
-/*
-  bg1.png est basé sur la version originale :
-  300 × 468 px.
-
-  On garde cette surface fixe pour que l'image ne se
-  recadre pas différemment quand le nombre de liens change.
-*/
 const backgroundWidth = 300;
 const backgroundHeight = 468;
 ---
@@ -32,6 +23,7 @@ const backgroundHeight = 468;
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <title>Psykoruptor — Links</title>
+	<link rel="icon" type="image/png" href="/icon0.png" />
   </head>
 
   <body>
@@ -45,22 +37,15 @@ const backgroundHeight = 468;
           --button-height: ${buttonHeight}px;
           --button-gap: ${buttonGap}px;
           --surface-height: ${surfaceHeight}px;
+          --icon-margin: ${iconMargin}px;
         `}
       >
 
-        <!--
-          BG1 partagé par tous les boutons.
-
-          Le SVG conserve toujours les dimensions originales
-          de l'image. Il est simplement coupé en bas lorsque
-          moins de boutons sont affichés.
-
-          Ainsi, retirer un lien ne change pas le cadrage de bg1.
-        -->
+        <!-- BG1 partagé par tous les boutons -->
         <div class="button-surface">
           <svg
-            viewBox={`0 0 ${backgroundWidth} ${backgroundHeight}`}
-            width={backgroundWidth}
+            viewBox={`0 0 ${buttonWidth} ${backgroundHeight}`}
+            width={buttonWidth}
             height={backgroundHeight}
             preserveAspectRatio="none"
             aria-hidden="true"
@@ -68,7 +53,9 @@ const backgroundHeight = 468;
             <defs>
               <mask id="buttonMask" maskUnits="userSpaceOnUse">
                 <rect
-                  width={backgroundWidth}
+                  x="0"
+                  y="0"
+                  width={buttonWidth}
                   height={backgroundHeight}
                   fill="black"
                 />
@@ -90,7 +77,7 @@ const backgroundHeight = 468;
               href="/bg1.png"
               x="0"
               y="0"
-              width={backgroundWidth}
+              width={buttonWidth}
               height={backgroundHeight}
               preserveAspectRatio="xMidYMid slice"
               mask="url(#buttonMask)"
@@ -100,7 +87,10 @@ const backgroundHeight = 468;
 
         {enabledLinks.map((link) => (
           <a href={link.url}>
-            <SocialIcon name={link.name} />
+            <div class="icon-container">
+              <SocialIcon name={link.name} />
+            </div>
+
             <span>{link.name}</span>
           </a>
         ))}
@@ -135,13 +125,11 @@ const backgroundHeight = 468;
       drop-shadow(0px -0.5px 0.5px white)
       drop-shadow(0px -2px 1.5px white)
       drop-shadow(0px 1px 1px black)
-      drop-shadow(0px 2px 3px black)
-      drop-shadow(0px 3px 3px black);
+      drop-shadow(0px 2px 3px black);
   }
 
   .links {
     position: relative;
-
     width: var(--button-width);
 
     display: flex;
@@ -149,12 +137,6 @@ const backgroundHeight = 468;
     gap: var(--button-gap);
   }
 
-  /*
-    Le SVG garde toujours la taille originale de bg1.
-
-    Le conteneur, lui, est seulement aussi haut que les
-    boutons actuellement activés.
-  */
   .button-surface {
     position: absolute;
     top: 0;
@@ -164,7 +146,6 @@ const backgroundHeight = 468;
     height: var(--surface-height);
 
     overflow: hidden;
-
     pointer-events: none;
 
     filter: drop-shadow(0px 4px 7px rgba(0, 0, 0, 0.7));
@@ -181,13 +162,9 @@ const backgroundHeight = 468;
     position: relative;
     z-index: 1;
 
-    display: grid;
-    grid-template-columns: 24px 1fr 24px;
-    align-items: center;
-
     width: var(--button-width);
     height: var(--button-height);
-    padding: 0 15px;
+
     box-sizing: border-box;
 
     background: transparent;
@@ -198,11 +175,39 @@ const backgroundHeight = 468;
     border-radius: 10px;
   }
 
+  /*
+    L'icône est placée avec exactement la même marge
+    en haut et à gauche.
+  */
+  .icon-container {
+    position: absolute;
+
+    left: var(--icon-margin);
+    top: var(--icon-margin);
+
+    width: 24px;
+    height: 24px;
+  }
+
+  /*
+    Le texte reste centré sur le bouton entier,
+    indépendamment de la position de l'icône.
+  */
   .links a span {
+    position: absolute;
+
+    left: 0;
+    right: 0;
+    top: 50%;
+
+    transform: translateY(-50%);
+
     text-align: center;
 
     filter:
       drop-shadow(0px -2px 2px white)
       drop-shadow(0px 2px 2px black);
+
+    pointer-events: none;
   }
 </style>

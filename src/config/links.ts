@@ -1,6 +1,7 @@
-export const buttonWidth = 300;
-export const buttonHeight = 54;
-export const buttonGap = 15;
+export const buttonWidth = 302;
+export const buttonHeight = 40;
+export const buttonGap = 20;
+export const iconMargin = 9;
 
 export const links = [
   {
