@@ -6,7 +6,7 @@ export const iconMargin = 9;
 export const links = [
   {
     name: "Facebook",
-    url: "https://www.facebook.com/profile.php?id=61581756783961",
+    url: "https://www.facebook.com/profile.php?id=61581529996818",
     enabled: true,
   },
   {
