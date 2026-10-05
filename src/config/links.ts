@@ -32,7 +32,7 @@ export const links = [
   {
     name: "Shotgun",
     url: "https://shotgun.live/fr/artists/psykoruptor?utm_source=artist-1699305",
-    enabled: false,
+    enabled: true,
   },
   {
     name: "GitHub",
