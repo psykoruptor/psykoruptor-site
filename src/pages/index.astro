@@ -134,6 +134,10 @@ const backgroundHeight = 468;
               mask="url(#buttonMask)"
             />
           </svg>
+          <canvas
+            id="warping-buttons"
+            aria-hidden="true"
+          ></canvas>
         </div>
 
         {enabledLinks.map((link) => (
@@ -253,6 +257,15 @@ const backgroundHeight = 468;
 
     width: var(--button-width);
     height: var(--surface-height);
+  }
+
+  #warping-buttons {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
   }
 
   .links a {
@@ -612,6 +625,316 @@ const backgroundHeight = 468;
     document.addEventListener("visibilitychange", () => {
       pageVisible = !document.hidden;
 
+      if (pageVisible) {
+        lastRenderTime = 0;
+        startAnimation();
+      } else {
+        stopAnimation();
+      }
+    });
+
+    window.addEventListener("resize", resizeCanvas);
+
+    canvas.addEventListener("webglcontextlost", (event) => {
+      event.preventDefault();
+      stopAnimation();
+      canvas.style.display = "none";
+    });
+  })();
+</script>
+
+<!-- Déformation WebGL indépendante de BG1, découpée dans les boutons -->
+<script is:inline>
+  (() => {
+    const canvas = document.getElementById("warping-buttons");
+    const surface = canvas?.parentElement;
+    const links = document.querySelector(".links");
+
+    if (!canvas || !surface || !links) return;
+
+    let gl;
+
+    try {
+      gl = canvas.getContext("webgl", {
+        alpha: true,
+        premultipliedAlpha: true,
+        antialias: false,
+        depth: false,
+        stencil: false,
+        powerPreference: "low-power",
+      });
+    } catch {
+      canvas.style.display = "none";
+      return;
+    }
+
+    if (!gl) {
+      canvas.style.display = "none";
+      return;
+    }
+
+    const vertexSource = `
+      attribute vec2 a_position;
+      varying vec2 v_uv;
+
+      void main() {
+        v_uv = a_position * 0.5 + 0.5;
+        gl_Position = vec4(a_position, 0.0, 1.0);
+      }
+    `;
+
+    const fragmentSource = `
+      precision mediump float;
+
+      uniform sampler2D u_image;
+      uniform vec2 u_resolution;
+      uniform vec2 u_imageResolution;
+      uniform float u_time;
+      uniform float u_buttonHeight;
+      uniform float u_buttonGap;
+      uniform float u_buttonWidth;
+      uniform float u_backgroundHeight;
+      uniform float u_cornerRadius;
+      uniform float u_buttonCount;
+
+      varying vec2 v_uv;
+
+      float roundedBox(vec2 p, vec2 halfSize, float radius) {
+        vec2 q = abs(p) - halfSize + radius;
+        return length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - radius;
+      }
+
+      void main() {
+        float x = v_uv.x * u_resolution.x;
+        float y = (1.0 - v_uv.y) * u_resolution.y;
+
+        float stride = u_buttonHeight + u_buttonGap;
+        float localY = mod(y, stride);
+        float buttonIndex = floor(y / stride);
+
+        float insideVertical = step(buttonIndex, u_buttonCount - 1.0)
+          * step(localY, u_buttonHeight);
+
+        vec2 point = vec2(
+          x - u_buttonWidth * 0.5,
+          localY - u_buttonHeight * 0.5
+        );
+
+        float distanceToButton = roundedBox(
+          point,
+          vec2(u_buttonWidth * 0.5, u_buttonHeight * 0.5),
+          u_cornerRadius
+        );
+
+        float alpha = (1.0 - smoothstep(-0.75, 0.75, distanceToButton))
+          * insideVertical;
+
+        if (alpha <= 0.001) {
+          gl_FragColor = vec4(0.0);
+          return;
+        }
+
+        // BG1 garde le cadrage « cover » de l'image originale (300 × 468).
+        vec2 uv = vec2(x / u_buttonWidth, y / u_backgroundHeight);
+        float canvasAspect = u_buttonWidth / u_backgroundHeight;
+        float imageAspect = u_imageResolution.x / u_imageResolution.y;
+
+        if (imageAspect > canvasAspect) {
+          uv.x = (uv.x - 0.5) * (canvasAspect / imageAspect) + 0.5;
+        } else {
+          uv.y = (uv.y - 0.5) * (imageAspect / canvasAspect) + 0.5;
+        }
+
+        float t = u_time;
+        float wave1 = sin(uv.y * 7.0 + uv.x * 3.0 + t * 0.28);
+        float wave2 = sin(uv.x * 8.0 - uv.y * 3.5 - t * 0.21);
+        float wave3 = sin(uv.x * 4.5 + uv.y * 5.0 + t * 0.16);
+
+        // Déformation plus discrète que celle du fond principal.
+        vec2 displacement = vec2(
+          wave1 * 0.55 + wave2 * 0.35,
+          wave2 * 0.45 + wave3 * 0.40
+        ) * 0.1;
+
+        vec2 warpedUV = clamp(uv + displacement, 0.001, 0.999);
+        vec4 color = texture2D(u_image, vec2(warpedUV.x, 1.0 - warpedUV.y));
+        gl_FragColor = vec4(color.rgb * alpha, color.a * alpha);
+      }
+    `;
+
+    function compileShader(type, source) {
+      const shader = gl.createShader(type);
+      if (!shader) return null;
+
+      gl.shaderSource(shader, source);
+      gl.compileShader(shader);
+
+      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        gl.deleteShader(shader);
+        return null;
+      }
+
+      return shader;
+    }
+
+    const vertexShader = compileShader(gl.VERTEX_SHADER, vertexSource);
+    const fragmentShader = compileShader(gl.FRAGMENT_SHADER, fragmentSource);
+
+    if (!vertexShader || !fragmentShader) {
+      canvas.style.display = "none";
+      return;
+    }
+
+    const program = gl.createProgram();
+    if (!program) {
+      canvas.style.display = "none";
+      return;
+    }
+
+    gl.attachShader(program, vertexShader);
+    gl.attachShader(program, fragmentShader);
+    gl.linkProgram(program);
+    gl.deleteShader(vertexShader);
+    gl.deleteShader(fragmentShader);
+
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+      canvas.style.display = "none";
+      return;
+    }
+
+    gl.useProgram(program);
+
+    const buffer = gl.createBuffer();
+    if (!buffer) {
+      canvas.style.display = "none";
+      return;
+    }
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(
+      gl.ARRAY_BUFFER,
+      new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]),
+      gl.STATIC_DRAW
+    );
+
+    const positionLocation = gl.getAttribLocation(program, "a_position");
+    gl.enableVertexAttribArray(positionLocation);
+    gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+    const uniform = (name) => gl.getUniformLocation(program, name);
+    const resolutionLocation = uniform("u_resolution");
+    const imageResolutionLocation = uniform("u_imageResolution");
+    const timeLocation = uniform("u_time");
+    const buttonHeightLocation = uniform("u_buttonHeight");
+    const buttonGapLocation = uniform("u_buttonGap");
+    const buttonWidthLocation = uniform("u_buttonWidth");
+    const backgroundHeightLocation = uniform("u_backgroundHeight");
+    const cornerRadiusLocation = uniform("u_cornerRadius");
+    const buttonCountLocation = uniform("u_buttonCount");
+
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+    gl.clearColor(0, 0, 0, 0);
+
+    const texture = gl.createTexture();
+    if (!texture) {
+      canvas.style.display = "none";
+      return;
+    }
+
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.uniform1i(uniform("u_image"), 0);
+
+    const image = new Image();
+    let imageReady = false;
+    let animationFrame = 0;
+    let lastRenderTime = 0;
+    let pageVisible = !document.hidden;
+
+    function resizeCanvas() {
+      const rect = surface.getBoundingClientRect();
+      const width = Math.max(1, Math.round(rect.width));
+      const height = Math.max(1, Math.round(rect.height));
+
+      if (canvas.width !== width || canvas.height !== height) {
+        canvas.width = width;
+        canvas.height = height;
+      }
+
+      gl.viewport(0, 0, width, height);
+      gl.uniform2f(resolutionLocation, width, height);
+
+      const style = getComputedStyle(links);
+      const buttonHeight = parseFloat(style.getPropertyValue("--button-height")) || 48;
+      const buttonGap = parseFloat(style.getPropertyValue("--button-gap")) || 8;
+      const buttonWidth = rect.width;
+      const buttonCount = links.querySelectorAll(":scope > a").length;
+
+      gl.uniform1f(buttonHeightLocation, buttonHeight);
+      gl.uniform1f(buttonGapLocation, buttonGap);
+      gl.uniform1f(buttonWidthLocation, buttonWidth);
+      gl.uniform1f(backgroundHeightLocation, 468.0);
+      gl.uniform1f(cornerRadiusLocation, 10.0);
+      gl.uniform1f(buttonCountLocation, buttonCount);
+    }
+
+    function render(now) {
+      animationFrame = 0;
+      if (!pageVisible || !imageReady) return;
+
+      if (now - lastRenderTime < 41) {
+        animationFrame = requestAnimationFrame(render);
+        return;
+      }
+
+      lastRenderTime = now;
+      resizeCanvas();
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.uniform1f(timeLocation, now * 0.001);
+      gl.drawArrays(gl.TRIANGLES, 0, 6);
+      animationFrame = requestAnimationFrame(render);
+    }
+
+    function startAnimation() {
+      if (imageReady && pageVisible && !animationFrame) {
+        animationFrame = requestAnimationFrame(render);
+      }
+    }
+
+    function stopAnimation() {
+      if (animationFrame) {
+        cancelAnimationFrame(animationFrame);
+        animationFrame = 0;
+      }
+    }
+
+    image.onload = () => {
+      gl.bindTexture(gl.TEXTURE_2D, texture);
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+      gl.uniform2f(
+        imageResolutionLocation,
+        image.naturalWidth,
+        image.naturalHeight
+      );
+      imageReady = true;
+      resizeCanvas();
+      startAnimation();
+    };
+
+    image.onerror = () => {
+      canvas.style.display = "none";
+    };
+
+    image.src = "/bg1.png";
+
+    document.addEventListener("visibilitychange", () => {
+      pageVisible = !document.hidden;
       if (pageVisible) {
         lastRenderTime = 0;
         startAnimation();
