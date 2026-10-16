@@ -1,4 +1,3 @@
-```astro
 ---
 import SocialIcon from "../components/SocialIcon.astro";
 import {
@@ -147,7 +146,7 @@ const backgroundHeight = 468;
         <iframe
           id="soundcloud-player"
           title="Psykoruptor — Premier concert Black Out"
-          src="https://w.soundcloud.com/player/?url=https%3A%2F%2Fsoundcloud.com%2Fpsykoruptor%2F1er-concert-black-out-16-10&auto_play=true&hide_related=true&show_comments=false&show_user=true&show_reposts=false&visual=false"
+          src="https://w.soundcloud.com/player/?url=https%3A%2F%2Fsoundcloud.com%2Fpsykoruptor%2F1er-concert-black-out-14-10&auto_play=true&hide_related=true&show_comments=false&show_user=true&show_reposts=false&visual=false"
           width="300"
           height="166"
           allow="autoplay"
@@ -300,7 +299,8 @@ const backgroundHeight = 468;
 
 <script is:inline>
   (() => {
-    const startPosition = 17 * 60 * 1000;
+    const startPosition = 16.95 * 60 * 1000;
+    const fadeDuration = 5000;
 
     function initializeSoundCloud() {
       const iframe = document.getElementById("soundcloud-player");
@@ -310,7 +310,24 @@ const backgroundHeight = 468;
       const widget = window.SC.Widget(iframe);
 
       widget.bind(window.SC.Widget.Events.READY, () => {
+        // Démarre à 17 minutes avec le volume à zéro.
+        widget.setVolume(0);
         widget.seekTo(startPosition);
+
+        // Monte linéairement de 0 à 100 % en 5 secondes.
+        const fadeStart = performance.now();
+
+        const fadeInterval = window.setInterval(() => {
+          const elapsed = performance.now() - fadeStart;
+          const progress = Math.min(elapsed / fadeDuration, 1);
+          const volume = Math.round(progress * 100);
+
+          widget.setVolume(volume);
+
+          if (progress >= 1) {
+            window.clearInterval(fadeInterval);
+          }
+        }, 50);
       });
     }
 
@@ -332,4 +349,3 @@ const backgroundHeight = 468;
     waitForSoundCloud();
   })();
 </script>
-```
