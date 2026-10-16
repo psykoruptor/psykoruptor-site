@@ -27,11 +27,11 @@ export const links = [
   {
     name: "SoundCloud",
     url: "https://soundcloud.com/psykoruptor",
-    enabled: false,
+    enabled: true,
   },
   {
     name: "Shotgun",
-    url: "https://shotgun.live/fr/artists/psykoruptor?utm_source=artist-1699305",
+    url: "https://shotgun.live/artists/psykoruptor",
     enabled: true,
   },
   {
