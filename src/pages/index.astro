@@ -1,3 +1,4 @@
+
 ---
 import SocialIcon from "../components/SocialIcon.astro";
 import {
@@ -23,7 +24,7 @@ const backgroundHeight = 468;
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <title>Psykoruptor — Links</title>
-	<link rel="icon" type="image/png" href="/icon0.png" />
+    <link rel="icon" type="image/png" href="/icon0.png" />
   </head>
 
   <body>
@@ -40,24 +41,33 @@ const backgroundHeight = 468;
           --icon-margin: ${iconMargin}px;
         `}
       >
-
         <!-- BG1 partagé par tous les boutons -->
         <div class="button-surface">
           <svg
-            viewBox={`0 0 ${buttonWidth} ${backgroundHeight}`}
+            viewBox={`0 0 ${buttonWidth} ${surfaceHeight}`}
             width={buttonWidth}
-            height={backgroundHeight}
+            height={surfaceHeight}
             preserveAspectRatio="none"
             aria-hidden="true"
           >
             <defs>
-              <mask id="buttonMask" maskUnits="userSpaceOnUse">
+              <mask
+                id="buttonMask"
+                maskUnits="userSpaceOnUse"
+                maskContentUnits="userSpaceOnUse"
+                mask-type="alpha"
+                x="0"
+                y="0"
+                width={buttonWidth}
+                height={surfaceHeight}
+              >
                 <rect
                   x="0"
                   y="0"
                   width={buttonWidth}
-                  height={backgroundHeight}
+                  height={surfaceHeight}
                   fill="black"
+                  fill-opacity="0"
                 />
 
                 {enabledLinks.map((_, index) => (
@@ -94,7 +104,6 @@ const backgroundHeight = 468;
             <span>{link.name}</span>
           </a>
         ))}
-
       </div>
     </main>
   </body>
@@ -155,7 +164,7 @@ const backgroundHeight = 468;
     display: block;
 
     width: var(--button-width);
-    height: 468px;
+    height: var(--surface-height);
   }
 
   .links a {
