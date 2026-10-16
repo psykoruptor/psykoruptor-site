@@ -7,7 +7,9 @@ import {
   buttonHeight,
   buttonGap,
   iconMargin,
+  fireColor,
 } from "../config/links";
+import { fireShadow0, fireShadow1 } from "../config/styles";
 
 const enabledLinks = links.filter((link) => link.enabled);
 
@@ -19,7 +21,10 @@ const backgroundWidth = 300;
 const backgroundHeight = 468;
 ---
 
-<html lang="fr">
+<html
+  lang="fr"
+  style={`--fire-shadow-0: ${fireShadow0}; --fire-shadow-1: ${fireShadow1};`}
+>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
@@ -33,11 +38,7 @@ const backgroundHeight = 468;
       href="/bg0.png"
       fetchpriority="high"
     />
-    <link
-      rel="preload"
-      as="image"
-      href="/bg1.png"
-    />
+    <link rel="preload" as="image" href="/bg1.png" />
   </head>
 
   <body>
@@ -46,6 +47,7 @@ const backgroundHeight = 468;
         class="logo"
         src="/logotext1.png"
         alt="Psykoruptor"
+        style={{ filter: fireShadow0 }}
         decoding="async"
       />
 
@@ -57,6 +59,7 @@ const backgroundHeight = 468;
           --button-gap: ${buttonGap}px;
           --surface-height: ${surfaceHeight}px;
           --icon-margin: ${iconMargin}px;
+          filter: ${fireShadow0};
         `}
       >
         <!-- BG1 partagé par tous les boutons -->
@@ -142,14 +145,6 @@ const backgroundHeight = 468;
 <style>
   body {
     margin: 0;
-    min-height: 100vh;
-
-    /* Couleur de secours avant le chargement de BG0 */
-    background-color: #100000;
-
-    background-image: url("/bg0.png");
-    background-size: cover;
-    background-position: center;
   }
 
   main {
@@ -158,18 +153,31 @@ const backgroundHeight = 468;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+
+    /* Fond de la page */
+    background-color: #100000;
+    background-image: url("/bg0.png");
+    background-size: cover;
+    background-position: center;
+
+    /* Rotation de teinte appliquée après les ombres et le contenu */
+    animation: rotateHue 20s linear infinite;
+  }
+
+  @keyframes rotateHue {
+    from {
+      filter: hue-rotate(0deg);
+    }
+
+    to {
+      filter: hue-rotate(360deg);
+    }
   }
 
   .logo {
     width: 300px;
     height: auto;
     margin-bottom: 30px;
-
-    filter:
-      drop-shadow(0px -0.5px 0.5px white)
-      drop-shadow(0px -2px 1.5px white)
-      drop-shadow(0px 1px 1px black)
-      drop-shadow(0px 2px 3px black);
   }
 
   .links {
@@ -191,8 +199,6 @@ const backgroundHeight = 468;
 
     overflow: hidden;
     pointer-events: none;
-
-    filter: drop-shadow(0px 4px 7px rgba(0, 0, 0, 0.7));
   }
 
   .button-surface svg {
@@ -231,6 +237,8 @@ const backgroundHeight = 468;
 
     width: 24px;
     height: 24px;
+
+    filter: var(--fire-shadow-1);
   }
 
   /*
@@ -248,9 +256,7 @@ const backgroundHeight = 468;
 
     text-align: center;
 
-    filter:
-      drop-shadow(0px -2px 2px white)
-      drop-shadow(0px 2px 2px black);
+    filter: var(--fire-shadow-1);
 
     pointer-events: none;
   }
