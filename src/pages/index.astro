@@ -25,11 +25,29 @@ const backgroundHeight = 468;
     <meta name="viewport" content="width=device-width" />
     <title>Psykoruptor — Links</title>
     <link rel="icon" type="image/png" href="/icon0.png" />
+
+    <!-- Préchargement des images principales -->
+    <link
+      rel="preload"
+      as="image"
+      href="/bg0.png"
+      fetchpriority="high"
+    />
+    <link
+      rel="preload"
+      as="image"
+      href="/bg1.png"
+    />
   </head>
 
   <body>
     <main>
-      <img class="logo" src="/logotext1.png" alt="Psykoruptor" />
+      <img
+        class="logo"
+        src="/logotext1.png"
+        alt="Psykoruptor"
+        decoding="async"
+      />
 
       <div
         class="links"
@@ -83,6 +101,18 @@ const backgroundHeight = 468;
               </mask>
             </defs>
 
+            <!-- Fond de secours visible avant le chargement de BG1 -->
+            {enabledLinks.map((_, index) => (
+              <rect
+                x="0"
+                y={index * (buttonHeight + buttonGap)}
+                width={buttonWidth}
+                height={buttonHeight}
+                rx="10"
+                fill="#180808"
+              />
+            ))}
+
             <image
               href="/bg1.png"
               x="0"
@@ -113,6 +143,10 @@ const backgroundHeight = 468;
   body {
     margin: 0;
     min-height: 100vh;
+
+    /* Couleur de secours avant le chargement de BG0 */
+    background-color: #100000;
+
     background-image: url("/bg0.png");
     background-size: cover;
     background-position: center;
@@ -130,6 +164,7 @@ const backgroundHeight = 468;
     width: 300px;
     height: auto;
     margin-bottom: 30px;
+
     filter:
       drop-shadow(0px -0.5px 0.5px white)
       drop-shadow(0px -2px 1.5px white)
